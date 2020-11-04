@@ -79,4 +79,17 @@ async function addRecord(database, storeName, data) {
     });
 }
 
-export {openDB, addRecord}
+/**
+ * [Async] Deletes records on a given key from the specified objectStore
+ * @param {IDBDatabase} database
+ * @param {string} objectStore
+ * @param {IDBIndex} index
+ * @param {IDBKeyRange | string} key 
+ */
+async function deleteRecords(database, objectStore, index, key) {
+    return new Promise(function (resolve, reject) {
+
+    });
+}
+
+export {openDB, addRecord, deleteRecords}
