@@ -36,7 +36,7 @@ async function openDB(database_name, database_version, upgrade_function) {
 }
 
 /**
- * Adds a single object to the specificed objectStore
+ * [Async] Adds a single object to the specificed objectStore
  * @param {IDBDatabase} database Initiliazed database
  * @param {string} objectStore Name of objectStore where transactions will be occurring
  * @param {object} data Object to be inserted into the objectStore
