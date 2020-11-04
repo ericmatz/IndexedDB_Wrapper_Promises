@@ -84,7 +84,7 @@ async function addRecord(database, storeName, data) {
  * @param {IDBDatabase} database Initialized database
  * @param {string} storeName Name of ObjectStore where transactions will be occurring
  * @param {IDBIndex} index An Index from a provided ObjectStore
- * @param {IDBKeyRange | string | number} key An instance of IDBKeyRange or string to search
+ * @param {any} key Key being looked for
  */
 async function deleteRecords(database, storeName, index, key) {
     return new Promise(function (resolve, reject) {
@@ -106,7 +106,7 @@ async function deleteRecords(database, storeName, index, key) {
             let objectStore = transaction.objectStore(storeName);
 
             let objectStoreIndex = objectStore.index(index);
-            
+
             let objectStoreCursor = objectStoreIndex.openCursor();
 
             objectStoreCursor.onsuccess = function (event) {
@@ -123,6 +123,7 @@ async function deleteRecords(database, storeName, index, key) {
                     }
                     cursor.continue();
                 }
+                resolve("Records Deletion Successful")
             }
 
             objectStoreCursor.onerror = function (event) {
