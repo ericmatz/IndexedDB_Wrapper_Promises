@@ -7,27 +7,31 @@
  */
 async function openDB(database_name, database_version, upgrade_function) {
     return new Promise(function (resolve, reject) {
-        let request = indexedDB.open(database_name, database_version);
+        try {
+            let request = indexedDB.open(database_name, database_version);
 
-        request.onsuccess = function () {
-            console.log("Database opened successfully")
-            resolve(request.result);
+            request.onsuccess = function () {
+                console.log("Database opened successfully")
+                resolve(request.result);
+            }
+
+            request.onerror = function (event) {
+                console.log(`Failed to open database - Supplied Data {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${request.error}`)
+                throw (`Request Failed - Supplied Data {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${request.error}`)
+            };
+
+            request.onupgradeneeded = function (event) {
+                console.log('OnUpgradeNeeded - Called')
+                upgrade_function(event.target.result)
+                    .then(console.log("Database Upgrade Successful"))
+                    .catch((reason) => {
+                        console.log(`Database Upgrade Failed, Reason: ${reason}, Supplied Data {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${request.error}`)
+                        throw (`Database Upgrade Failed - Reason: ${reason}, Supplied Data {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${request.error}`)
+                    })
+            };
+        } catch (error) {
+            reject(`Error: openDB - ${error.message}`)
         }
-
-        request.onerror = function (event) {
-            console.log(`Failed to open database - Supplied Data {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${request.error}`)
-            reject(`Failed to open database - Supplied Data {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${request.error}`)
-        };
-
-        request.onupgradeneeded = function (event) {
-            console.log('OnUpgradeNeeded - Called')
-            upgrade_function(event.target.result)
-                .then(console.log("Database Upgrade Successful"))
-                .catch((reason) => {
-                    console.log(`Database Upgrade Failed, Reason: ${reason}`)
-                })
-        };
-
     });
 }
 
@@ -70,7 +74,7 @@ async function addRecord(database, storeName, data) {
             };
 
         } catch (error) {
-            reject(`Error: AddRecord - ${error.message}`)
+            reject(`Error: addRecord - ${error.message}`)
         }
     });
 }
