@@ -105,8 +105,8 @@ async function deleteRecords(database, storeName, index, key) {
 
             let objectStore = transaction.objectStore(storeName);
 
-            let objectStoreIndex = objectStore.index(idex);
-            n
+            let objectStoreIndex = objectStore.index(index);
+            
             let objectStoreCursor = objectStoreIndex.openCursor();
 
             objectStoreCursor.onsuccess = function (event) {
