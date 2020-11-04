@@ -38,7 +38,7 @@ async function openDB(database_name, database_version, upgrade_function) {
 /**
  * [Async] Adds a single object to the specificed objectStore
  * @param {IDBDatabase} database Initiliazed database
- * @param {string} objectStore Name of objectStore where transactions will be occurring
+ * @param {string} storeName Name of objectStore where transactions will be occurring
  * @param {object} data Object to be inserted into the objectStore
  * @returns {Promise} Resolve => String | Reject => Error
  */
@@ -52,11 +52,11 @@ async function addRecord(database, storeName, data) {
             };
 
             transaction.onabort = function (event) {
-                throw (`Transaction Aborted - Supplied Data {${database},${storeName},${data}} Code: ${event.target.errorCode} Error: ${request.error}`)
+                throw (`Transaction Aborted - Supplied Data: {${database},${storeName},${data}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
             }
 
             transaction.onerror = function (event) {
-                throw (`Transaction Failed - Supplied Data {${database},${storeName},${data}} Code: ${event.target.errorCode} Error: ${request.error}`)
+                throw (`Transaction Failed - Supplied Data: {${database},${storeName},${data}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
             };
 
             let objectStore = transaction.objectStore(storeName);
@@ -65,12 +65,12 @@ async function addRecord(database, storeName, data) {
 
             request.onsuccess = function () {
                 console.log("Add Request Succesful");
-                resolve()
+                resolve("Add Request Succesful")
             };
 
             request.onerror = function (event) {
-                console.log(`Request Failed: addRecord - Supplied Data {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${request.error}`)
-                throw (`Request Failed: Supplied Data {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${request.error}`)
+                console.log(`Request Failed: addRecord - Supplied Data: {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+                throw (`Request Failed: Supplied Data: {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${request.error}`)
             };
 
         } catch (error) {
@@ -80,15 +80,58 @@ async function addRecord(database, storeName, data) {
 }
 
 /**
- * [Async] Deletes records on a given key from the specified objectStore
- * @param {IDBDatabase} database
- * @param {string} objectStore
- * @param {IDBIndex} index
- * @param {IDBKeyRange | string} key 
+ * [Async] Deletes records on a given index and key from the specified objectStore
+ * @param {IDBDatabase} database Initialized database
+ * @param {string} storeName Name of ObjectStore where transactions will be occurring
+ * @param {IDBIndex} index An Index from a provided ObjectStore
+ * @param {IDBKeyRange | string | number} key An instance of IDBKeyRange or string to search
  */
-async function deleteRecords(database, objectStore, index, key) {
+async function deleteRecords(database, storeName, index, key) {
     return new Promise(function (resolve, reject) {
+        try {
+            let transaction = database.transaction("records", "readwrite");
 
+            transaction.oncomplete = function () {
+                console.log("Delete Transaction Successful.");
+            };
+
+            transaction.onabort = function (event) {
+                throw (`Transaction Aborted - Supplied Data: {${database},${storeName},${index},${key} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+            }
+
+            transaction.onerror = function (event) {
+                throw (`Transaction Failed - Supplied Data: {${database},${storeName},${index},${key} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+            };
+
+            let objectStore = transaction.objectStore(storeName);
+
+            let objectStoreIndex = objectStore.index(idex);
+            n
+            let objectStoreCursor = objectStoreIndex.openCursor();
+
+            objectStoreCursor.onsuccess = function (event) {
+                let cursor = event.target.result;
+                if (cursor) {
+                    if (cursor.value[index] === key) {
+                        let request = cursor.delete();
+                        request.onsuccess = function () {
+                            console.log('Record Deleted:', cursor.value);
+                        }
+                        request.onerror = function (event) {
+                            throw (`Request Failed - Cursor: ${cursor} Supplied Data: {${database},${storeName},${index},${key} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+                        }
+                    }
+                    cursor.continue();
+                }
+            }
+
+            objectStoreCursor.onerror = function (event) {
+                throw (`Cursor Failed - Supplied Data: {${database},${storeName},${index},${key} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+            }
+
+        } catch (error) {
+            reject(`Error: deleteRecords - ${error}`)
+        }
     });
 }
 
