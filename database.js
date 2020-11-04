@@ -39,7 +39,40 @@ async function openDB(database_name, database_version, upgrade_function) {
  * @returns {Promise} Resolve => String | Reject => Error
  */
 async function addRecord(database, storeName, data) {
-    return new Promise(function (resolve, reject) {});
+    return new Promise(function (resolve, reject) {
+        try {
+            let transaction = database.transaction(storeName, "readwrite");
+
+            transaction.oncomplete = function () {
+                console.log("Add Transaction Successful.");
+            };
+
+            transaction.onabort = function (event) {
+                throw (`Transaction Aborted - Supplied Data {${database},${storeName},${data}} Code: ${event.target.errorCode} Error: ${request.error}`)
+            }
+
+            transaction.onerror = function (event) {
+                throw (`Transaction Failed - Supplied Data {${database},${storeName},${data}} Code: ${event.target.errorCode} Error: ${request.error}`)
+            };
+
+            let objectStore = transaction.objectStore(storeName);
+
+            let request = objectStore.add(data);
+
+            request.onsuccess = function () {
+                console.log("Add Request Succesful");
+                resolve()
+            };
+
+            request.onerror = function (event) {
+                console.log(`Request Failed: addRecord - Supplied Data {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${request.error}`)
+                throw (`Request Failed: Supplied Data {${database_name},${database_version},${upgrade_function}} Code: ${event.target.errorCode} Error: ${request.error}`)
+            };
+
+        } catch (error) {
+            reject(`Error: AddRecord - ${error.message}`)
+        }
+    });
 }
 
 export {openDB, addRecord}
