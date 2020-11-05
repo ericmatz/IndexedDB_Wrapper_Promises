@@ -137,11 +137,11 @@ function getRecordsOnIndex(database, storeName, indexName, key) {
         };
 
         transaction.onabort = function (event) {
-            reject(`Error: getRecordsOnIndex - Transaction Aborted - Supplied Data: {${database},${storeName},${indexName},${key} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+            reject(`Error: getRecordsOnIndex - Transaction Aborted - Supplied Data: {${database},${storeName},${indexName},${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
         }
 
         transaction.onerror = function (event) {
-            reject(`Error: getRecordsOnIndex - Transaction Failed - Supplied Data: {${database},${storeName},${indexName},${key} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+            reject(`Error: getRecordsOnIndex - Transaction Failed - Supplied Data: {${database},${storeName},${indexName},${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
         };
 
         let request = transaction.objectStore(storeName).index(indexName).getAll(key);
@@ -160,12 +160,38 @@ function getRecordsOnIndex(database, storeName, indexName, key) {
 
 /**
  * Returns all records from the provided ObjectStore
- * @param database 
- * @param storeName 
+ * @param database Initialized database
+ * @param storeName  Name of ObjectStore where transactions will be occurring
  * @returns {Promise} Resolve => Array of Object | Reject => Reason
  */
 function getRecordsOnObjectStore(database, storeName) {
-    return new Promise(function (resolve, reject) {})
+    return new Promise(function (resolve, reject) {
+        let transaction = database.transaction(storeName,"readonly");
+
+        transaction.oncomplete = function () {
+            console.log("Get All Transaction Successful.");
+        };
+
+        transaction.onabort = function (event) {
+            reject(`Error: getRecordsOnObjectStore - Transaction Aborted - Supplied Data: {${database},${storeName}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+        }
+
+        transaction.onerror = function (event) {
+            reject(`Error: getRecordsOnObjectStore - Transaction Failed - Supplied Data: {${database},${storeName}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+        };
+
+        let request = transaction.objectStore(storeName).getAll();
+
+        request.onsuccess = function (event) {
+            console.log("Get All Request Succesful");
+            resolve(event.target.result)
+        };
+
+        request.onerror = function (event) {
+            reject(`Error: getRecordsOnObjectStore - Request Failed - Supplied Data: {${database},${storeName}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+        };
+
+    })
 }
 
 export {openDB, addRecord, deleteRecords, getRecordsOnIndex}
