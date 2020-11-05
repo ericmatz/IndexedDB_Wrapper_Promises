@@ -136,4 +136,18 @@ async function deleteRecords(database, storeName, index, key) {
     });
 }
 
-export {openDB, addRecord, deleteRecords}
+/**
+ * Returns all records from the provided ObjectStore searching on the provided Index
+ * @param {IDBDatabase} database
+ * @param {string} storeName
+ * @param {string} index
+ * @param {IDBKeyRange | any} key
+ * @returns {Promise} Resolve => Array of Objects | Reject => Reason
+ */
+async function getRecordsOnIndex(){
+    return new Promise(function(resolve,reject){
+
+    });
+}
+
+export {openDB, addRecord, deleteRecords, getRecordsOnIndex}
