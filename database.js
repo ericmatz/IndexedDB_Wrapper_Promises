@@ -166,7 +166,7 @@ function getRecordsOnIndex(database, storeName, indexName, key) {
  */
 function getRecordsOnObjectStore(database, storeName) {
     return new Promise(function (resolve, reject) {
-        let transaction = database.transaction(storeName,"readonly");
+        let transaction = database.transaction(storeName, "readonly");
 
         transaction.oncomplete = function () {
             console.log("Get All Transaction Successful.");
@@ -194,4 +194,10 @@ function getRecordsOnObjectStore(database, storeName) {
     })
 }
 
-export {openDB, addRecord, deleteRecords, getRecordsOnIndex}
+export {
+    openDB,
+    addRecords,
+    deleteRecords,
+    getRecordsOnIndex,
+    getRecordsOnObjectStore
+}
