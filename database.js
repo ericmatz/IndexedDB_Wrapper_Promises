@@ -80,7 +80,7 @@ function addRecords(database, storeName, data) {
  */
 function deleteRecords(database, storeName, indexName, key) {
     return new Promise(function (resolve, reject) {
-        let transaction = database.transaction("records", "readwrite");
+        let transaction = database.transaction(storeName, "readwrite");
 
         transaction.oncomplete = function () {
             console.log("Delete Transaction Successful.");
