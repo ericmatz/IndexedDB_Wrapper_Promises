@@ -78,7 +78,7 @@ function addRecords(database, storeName, data) {
  * @param {string} indexName An Index from a provided ObjectStore
  * @param {any} key Key being looked for
  */
-function deleteRecords(database, storeName, indexName, key) {
+function deleteRecordsOnIndex(database, storeName, indexName, key) {
     return new Promise(function (resolve, reject) {
 
         console.log(`I'm trying to delete ${key} from the index ${indexName} in the objectstore ${storeName}`)
@@ -103,7 +103,7 @@ function deleteRecords(database, storeName, indexName, key) {
         console.log(objectStoreCursor)
 
         objectStoreCursor.onsuccess = function (event) {
-            console.log("cursor:",event)
+            console.log("cursor:", event)
             let cursor = event.target.result;
             if (cursor) {
                 console.log(cursor.value[indexName])
@@ -117,7 +117,7 @@ function deleteRecords(database, storeName, indexName, key) {
                     }
                 }
                 cursor.continue();
-            }else{
+            } else {
                 reject(`Error: deleteRecords - Request Failed - Cursor: ${cursor} Supplied Data: {${database},${storeName},${indexName},${key} Code: ${event.target.errorCode} Error: ${event.target.error}`)
             }
         }
@@ -174,7 +174,7 @@ function getRecordsOnIndex(database, storeName, indexName, key) {
  */
 function getRecordsOnObjectStore(database, storeName) {
     return new Promise(function (resolve, reject) {
-        
+
         let transaction = database.transaction(storeName, "readonly");
 
         transaction.oncomplete = function () {
@@ -210,10 +210,10 @@ function getRecordsOnObjectStore(database, storeName) {
  * @param {IDBKeyRange | any} key KeyPath value to search for
  * @returns {Promise} Resolve => Array of Objects | Reject => Reason
  */
-function getRecordsOnKeyPath (database, storeName, key){
+function getRecordsOnKeyPath(database, storeName, key) {
     return new Promise(function (resolve, reject) {
-        
-        let transaction = database.transaction(storeName,"readonly");
+
+        let transaction = database.transaction(storeName, "readonly");
 
         transaction.oncomplete = function () {
             console.log("Get Transaction Successful.");
@@ -238,11 +238,50 @@ function getRecordsOnKeyPath (database, storeName, key){
             reject(`Error: getRecordsOnKeyPath - Request Failed - Supplied Data: {${database},${storeName},${indexName},${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
         };
     });
+}
 
-}export {
+/**
+ * Deletes records with a given keypath from the specified objectStore
+ * @param {IDBDatabase} database Initialized database
+ * @param {string} storeName Name of ObjectStore where transactions will be occurring
+ * @param {string} indexName An Index from a provided ObjectStore
+ * @param {IDBKeyRange | any} key KeyPath value to search for
+ */
+function deleteRecordsOnKeyPath(database, storeName, key) {
+    return new Promise(function (resolve, reject) {
+
+        let transaction = database.transaction(storeName, "readwrite");
+
+        transaction.oncomplete = function () {
+            console.log("Delete Transaction Successful.");
+        };
+
+        transaction.onabort = function (event) {
+            reject(`Error: deleteRecordsOnKeyPath - Transaction Aborted - Supplied Data: {${database},${storeName}${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+        }
+
+        transaction.onerror = function (event) {
+            reject(`Error: deleteRecordsOnKeyPath - Transaction Failed - Supplied Data: {${database},${storeName},${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+        };
+
+        let request = transaction.objectStore(storeName).delete(key);
+
+        request.onsuccess = function () {
+            resolve("Delete Request(s) Succesful");
+        };
+
+        request.onerror = function (event) {
+            reject(`Error: deleteRecordsOnKeyPath - Request Failed - Supplied Data: {${database},${storeName},${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+        };
+    });
+}
+
+
+export {
     openDB,
     addRecords,
-    deleteRecords,
+    deleteRecordsOnIndex,
+    deleteRecordsOnKeyPath,
     getRecordsOnIndex,
     getRecordsOnObjectStore,
     getRecordsOnKeyPath
