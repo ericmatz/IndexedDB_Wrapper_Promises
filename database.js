@@ -220,11 +220,11 @@ function getRecordsOnKeyPath(database, storeName, key) {
         };
 
         transaction.onabort = function (event) {
-            reject(`Error: getRecordsOnKeyPath - Transaction Aborted - Supplied Data: {${database},${storeName},${indexName},${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+            reject(`Error: getRecordsOnKeyPath - Transaction Aborted - Supplied Data: {${database},${storeName},${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
         }
 
         transaction.onerror = function (event) {
-            reject(`Error: getRecordsOnKeyPath - Transaction Failed - Supplied Data: {${database},${storeName},${indexName},${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+            reject(`Error: getRecordsOnKeyPath - Transaction Failed - Supplied Data: {${database},${storeName},${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
         };
 
         let request = transaction.objectStore(storeName).getAll(key);
@@ -235,7 +235,7 @@ function getRecordsOnKeyPath(database, storeName, key) {
         };
 
         request.onerror = function (event) {
-            reject(`Error: getRecordsOnKeyPath - Request Failed - Supplied Data: {${database},${storeName},${indexName},${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
+            reject(`Error: getRecordsOnKeyPath - Request Failed - Supplied Data: {${database},${storeName},${key}} Code: ${event.target.errorCode} Error: ${event.target.error}`)
         };
     });
 }
